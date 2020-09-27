@@ -7,5 +7,3 @@ set(doxy_main_page ${PROJECT_SOURCE_DIR}/README.md)
 add_subdirectory(src)
 add_subdirectory(docs)
 add_subdirectory(tests)
-
-#file(COPY input DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

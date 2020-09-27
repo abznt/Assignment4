@@ -1,7 +1,3 @@
-//
-// Created by berge on 9/26/2020.
-//
-
 #include "Hand.h"
 #include <stdexcept>
 #include <algorithm>
@@ -27,16 +23,22 @@ namespace poker {
         }
     }
 
-    int Hand::evaluateHand() {
-        std::sort(m_cards.begin(), m_cards.end());
-        std::array<int, 13> countByRank{0};
-        for (auto &card : m_cards) {
-            countByRank[card-2]++;
+    unsigned int Hand::evaluateHand() const {
+        if (m_cardIndex < m_cards.size()) {
+            throw std::runtime_error("Hand::evaluateHand() - hand does not have a full set of cards");
         }
+        // Count the occurances of each card rank
+        std::array<int, 13> countByRank{0};
+        for (int i = 0; i < m_cards.size(); ++i) {
+            countByRank[m_cards[i]-2]++;
+        }
+
         spdlog::debug("Count by rank: [{}] [{}] [{}] [{}] [{}] [{}] [{}] [{}] [{}] [{}] [{}] [{}] [{}]",
                       countByRank[0], countByRank[1], countByRank[2], countByRank[3], countByRank[4], countByRank[5],
                       countByRank[6], countByRank[7], countByRank[8], countByRank[9], countByRank[10], countByRank[11],
                       countByRank[12]);
+
+        // Tests for the various hand types
         std::array<int, 5> straight{1, 1, 1, 1, 1};
         bool isFlush = (m_cards[0].getSuit() == m_cards[1].getSuit()) &&
                 (m_cards[1].getSuit() == m_cards[2].getSuit()) &&
@@ -53,49 +55,131 @@ namespace poker {
         else {
             secondPair = countByRank.end();
         }
+
+        // Evaluate the hand type and score it
         if ((isStraight != countByRank.end()) && isFlush) {
-            spdlog::debug("Straight flush identified at {}", isStraight - countByRank.begin());
+            // Straight flush
+            unsigned int handValue = 8;
+            for (int i = countByRank.size() - 1; i >= 0; --i) {
+                if (countByRank.at(i) == 1) {
+                    handValue = (handValue << 4) + i;
+                }
+            }
+            spdlog::debug("Straight flush identified");
+            return handValue;
         }
         else if (isFourOfKind != countByRank.end()) {
-            spdlog::debug("Four of a kind identified at {}", isFourOfKind - countByRank.begin());
+            // Four of a kind
+            unsigned int handValue = 7;
+            int fourIndex = int(isFourOfKind - countByRank.begin());
+            for (int i = 0; i < 4; ++i) { handValue = (handValue << 4) + fourIndex; }
+            for (int i = countByRank.size() - 1; i >= 0; --i) {
+                if (countByRank.at(i) == 1) {
+                    handValue = (handValue << 4) + i;
+                }
+            }
+            spdlog::debug("Four of a kind identified");
+            return handValue;
         }
         else if ((isTriple != countByRank.end()) && (firstPair != countByRank.end())) {
-            spdlog::debug("Full house identified at {}, {}", isTriple - countByRank.begin(), firstPair - countByRank.begin());
+            // Full house
+            unsigned int handValue = 6;
+            int tripleIndex = int(isTriple - countByRank.begin());
+            int pairIndex = int(firstPair - countByRank.begin());
+            for (int i = 0; i < 3; ++i){ handValue = (handValue << 4) + tripleIndex; }
+            for (int i = 0; i < 2; ++i){ handValue = (handValue << 4) + pairIndex; }
+            spdlog::debug("Full house identified");
+            return handValue;
         }
         else if (isFlush) {
+            // Flush
+            unsigned int handValue = 5;
+            for (int i = countByRank.size() - 1; i >= 0; --i) {
+                if (countByRank.at(i) == 1) {
+                    handValue = (handValue << 4) + i;
+                }
+            }
             spdlog::debug("Flush identified");
+            return handValue;
         }
         else if (isStraight != countByRank.end()) {
+            // Straight
+            unsigned int handValue = 4;
+            for (int i = countByRank.size() - 1; i >= 0; --i) {
+                if (countByRank.at(i) == 1) {
+                    handValue = (handValue << 4) + i;
+                }
+            }
             spdlog::debug("Straight identified at {}", isStraight - countByRank.begin());
+            return handValue;
         }
         else if (isTriple != countByRank.end()) {
-            spdlog::debug("Three of a kind identified at {}", isTriple - countByRank.begin());
+            // Three of a kind
+            unsigned int handValue = 3;
+            int tripleIndex = int(isTriple - countByRank.begin());
+            for (int i = 0; i < 3; ++i){ handValue = (handValue << 4) + tripleIndex; }
+            for (int i = countByRank.size() - 1; i >= 0; --i) {
+                if (countByRank.at(i) == 1) {
+                    handValue = (handValue << 4) + i;
+                }
+            }
+            spdlog::debug("Three of a kind identified");
+            return handValue;
         }
         else if ((firstPair != countByRank.end()) && (secondPair != countByRank.end())) {
-            spdlog::debug("Two pairs identified at {}, {}", firstPair - countByRank.begin(), secondPair - countByRank.begin());
+            // Two pair
+            unsigned int handValue = 2;
+            int pair1Index = int(firstPair - countByRank.begin());
+            int pair2Index = int(secondPair - countByRank.begin());
+            for (int i = 0; i < 2; ++i) { handValue = (handValue << 4) + pair2Index; }
+            for (int i = 0; i < 2; ++i) { handValue = (handValue << 4) + pair1Index; }
+            for (int i = countByRank.size() - 1; i >= 0; --i) {
+                if (countByRank.at(i) == 1) {
+                    handValue = (handValue << 4) + i;
+                }
+            }
+            spdlog::debug("Two pairs identified");
+            return handValue;
         }
         else if (firstPair != countByRank.end()) {
-            int pairValue = int(firstPair - countByRank.begin() + 2);
-            countByRank.at(*firstPair) = 0;
-            spdlog::debug("Pair identified at {}", firstPair - countByRank.begin());
-            return 1000 + 50*pairValue;
+            // One pair
+            unsigned int handValue = 1;
+            int pairIndex = int(firstPair - countByRank.begin());
+            for (int i = 0; i < 2; ++i) { handValue = (handValue << 4) + pairIndex; }
+            for (int i = countByRank.size() - 1; i >= 0; --i) {
+                if (countByRank.at(i) == 1) {
+                    handValue = (handValue << 4) + i;
+                }
+            }
+            spdlog::debug("Pair identified");
+            return handValue;
         }
         else {
-            auto kickerValue = (countByRank.rend() - std::find(countByRank.rbegin(), countByRank.rend(), 1) - 1) + 2;
-            spdlog::debug("High card identified: {}", kickerValue);
-            return kickerValue;
+            // High card
+            unsigned int handValue = 0;
+            for (int i = countByRank.size() - 1; i >= 0; --i) {
+                if (countByRank.at(i) == 1) {
+                    handValue = (handValue << 4) + i;
+                }
+            }
+            spdlog::debug("High card identified");
+            return handValue;
         }
-        return 0;
+
     }
 
-    bool operator<(const Hand &hand1, const Hand &hand2) {
-        if (hand1.m_cardIndex < hand1.m_cards.size()) {
-            throw std::runtime_error("Hand::operator< hand 1 does not have a full set of cards");
+    int Hand::compareTo(const Hand &hand) const {
+        unsigned int myValue = evaluateHand();
+        unsigned int otherValue = hand.evaluateHand();
+        if (myValue < otherValue) {
+            return -1;
         }
-        if (hand2.m_cardIndex < hand2.m_cards.size()) {
-            throw std::runtime_error("Hand::operator< hand 2 does not have a full set of cards");
+        else if (myValue > otherValue) {
+            return 1;
         }
-        return false;
+        else {
+            return 0;
+        }
     }
 
     std::ostream &operator<<(std::ostream &out, const Hand &hand) {

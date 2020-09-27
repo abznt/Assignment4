@@ -9,6 +9,16 @@ class HandTests : public ::testing::Test {
 };
 
 namespace poker {
+    TEST_F(HandTests, TestRoyalFlush) {
+        Hand hand{};
+        hand.emplaceCard("10", "D");
+        hand.emplaceCard("J", "D");
+        hand.emplaceCard("Q", "D");
+        hand.emplaceCard("K", "D");
+        hand.emplaceCard("A", "D");
+        EXPECT_EQ(hand.evaluateHand(), 9222808);
+    }
+
     TEST_F(HandTests, TestStraightFlush) {
         Hand hand{};
         hand.emplaceCard("8", "D");
@@ -16,8 +26,7 @@ namespace poker {
         hand.emplaceCard("10", "D");
         hand.emplaceCard("J", "D");
         hand.emplaceCard("Q", "D");
-        int value = hand.evaluateHand();
-        EXPECT_TRUE(true);
+        EXPECT_EQ(hand.evaluateHand(), 9082998);
     }
 
     TEST_F(HandTests, TestFourOfKind) {
@@ -27,8 +36,7 @@ namespace poker {
         hand.emplaceCard("5", "C");
         hand.emplaceCard("5", "H");
         hand.emplaceCard("9", "D");
-        int value = hand.evaluateHand();
-        EXPECT_TRUE(true);
+        EXPECT_EQ(hand.evaluateHand(), 7549751);
     }
 
     TEST_F(HandTests, TestFullHouse) {
@@ -38,8 +46,7 @@ namespace poker {
         hand.emplaceCard("5", "C");
         hand.emplaceCard("9", "H");
         hand.emplaceCard("9", "D");
-        int value = hand.evaluateHand();
-        EXPECT_TRUE(true);
+        EXPECT_EQ(hand.evaluateHand(), 6501239);
     }
 
     TEST_F(HandTests, TestFlush) {
@@ -49,8 +56,7 @@ namespace poker {
         hand.emplaceCard("6", "H");
         hand.emplaceCard("10", "H");
         hand.emplaceCard("9", "H");
-        int value = hand.evaluateHand();
-        EXPECT_TRUE(true);
+        EXPECT_EQ(hand.evaluateHand(), 5796912);
     }
 
     TEST_F(HandTests, TestStraight) {
@@ -60,8 +66,7 @@ namespace poker {
         hand.emplaceCard("7", "C");
         hand.emplaceCard("8", "H");
         hand.emplaceCard("9", "D");
-        int value = hand.evaluateHand();
-        EXPECT_TRUE(true);
+        EXPECT_EQ(hand.evaluateHand(), 4678979);
     }
 
     TEST_F(HandTests, TestThreeOfKind) {
@@ -71,8 +76,7 @@ namespace poker {
         hand.emplaceCard("5", "C");
         hand.emplaceCard("8", "H");
         hand.emplaceCard("9", "D");
-        int value = hand.evaluateHand();
-        EXPECT_TRUE(true);
+        EXPECT_EQ(hand.evaluateHand(), 3355510);
     }
 
     TEST_F(HandTests, TestTwoPair) {
@@ -82,8 +86,7 @@ namespace poker {
         hand.emplaceCard("8", "C");
         hand.emplaceCard("8", "H");
         hand.emplaceCard("9", "D");
-        int value = hand.evaluateHand();
-        EXPECT_TRUE(true);
+        EXPECT_EQ(hand.evaluateHand(), 2515767);
     }
 
     TEST_F(HandTests, TestPair) {
@@ -93,8 +96,7 @@ namespace poker {
         hand.emplaceCard("7", "C");
         hand.emplaceCard("8", "H");
         hand.emplaceCard("9", "D");
-        int value = hand.evaluateHand();
-        EXPECT_TRUE(true);
+        EXPECT_EQ(hand.evaluateHand(), 1259365);
     }
 
     TEST_F(HandTests, TestHighCard) {
@@ -104,6 +106,6 @@ namespace poker {
         hand.emplaceCard("4", "C");
         hand.emplaceCard("8", "H");
         hand.emplaceCard("9", "D");
-        EXPECT_EQ(hand.evaluateHand(), 9);
+        EXPECT_EQ(hand.evaluateHand(), 484128);
     }
 }

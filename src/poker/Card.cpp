@@ -27,16 +27,8 @@ namespace poker {
         return m_value;
     }
 
-    void Card::setValue(int val) {
-        m_value = val;
-    }
-
     Suit Card::getSuit() const {
         return m_suit;
-    }
-
-    void Card::setSuit(Suit suit) {
-        m_suit = suit;
     }
 
     Card::operator int() const {
