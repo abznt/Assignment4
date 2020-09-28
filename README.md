@@ -1,3 +1,3 @@
-605.604 - Assignment 2 {#mainpage}
+605.604 - Assignment 4 {#mainpage}
 =========
-This is the DOxygen documentation for Assignment 2.
+This is the DOxygen documentation for Assignment 4.
